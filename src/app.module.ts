@@ -23,7 +23,7 @@ import { NotificationsModule } from './notifications/notifications.module';
       password: process.env.DB_PASSWORD || undefined,
       database: process.env.DB_NAME ?? 'default_db',
       autoLoadEntities: true,
-      synchronize: true, // ¡IMPORTANTE! solo en desarrollo
+      synchronize: true,
     }),
     AuthModule,
     UsersModule,
