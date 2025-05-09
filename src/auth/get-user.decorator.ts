@@ -11,8 +11,7 @@ export const User = createParamDecorator(
   },
 );
 
-export type UserType = { // Define a generic user type
+export type UserType = {
   id: string;
   name: string;
-  // Add other user properties as needed
 };

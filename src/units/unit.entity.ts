@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Building } from '../buildings/building.entity';
+import { User } from '../users/user.entity';
 
 @Entity()
 export class Unit {
@@ -17,4 +17,10 @@ export class Unit {
     onDelete: 'CASCADE',
   })
   building: Building;
+
+  @ManyToOne(() => User, { nullable: true })
+  owner: User;
+
+  @ManyToOne(() => User, { nullable: true })
+  tenant: User;
 }

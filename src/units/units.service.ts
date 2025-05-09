@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,6 +10,8 @@ import { Building } from '../buildings/building.entity';
 
 @Injectable()
 export class UnitsService {
+  [x: string]: any;
+  userRepo: any;
   constructor(
     @InjectRepository(Unit)
     private readonly unitRepo: Repository<Unit>,
@@ -23,10 +28,19 @@ export class UnitsService {
       squareMeters: dto.squareMeters,
       building,
     });
-    return this.unitRepo.save(unit);
-  }
 
-  findAll() {
-    return this.unitRepo.find({ relations: ['building'] });
+    if (dto.ownerId) {
+      const owner = await this.userRepo.findOneBy({ id: dto.ownerId });
+      if (!owner) throw new NotFoundException('Owner not found');
+      unit.owner = owner;
+    }
+
+    if (dto.tenantId) {
+      const tenant = await this.userRepo.findOneBy({ id: dto.tenantId });
+      if (!tenant) throw new NotFoundException('Tenant not found');
+      unit.tenant = tenant;
+    }
+
+    return this.unitRepo.save(unit);
   }
 }

@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString, IsOptional } from 'class-validator';
 
 export class CreateUnitDto {
   @IsString()
@@ -9,4 +9,12 @@ export class CreateUnitDto {
 
   @IsNumber()
   buildingId: number;
+
+  @IsOptional()
+  @IsNumber()
+  ownerId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  tenantId?: number;
 }
