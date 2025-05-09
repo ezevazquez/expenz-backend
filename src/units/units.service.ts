@@ -19,6 +19,12 @@ export class UnitsService {
     private readonly buildingRepo: Repository<Building>,
   ) {}
 
+  findAll() {
+    return this.unitRepo.find({
+      relations: ['building', 'owner', 'tenant'],
+    });
+  }
+
   async create(dto: CreateUnitDto) {
     const building = await this.buildingRepo.findOneBy({ id: dto.buildingId });
     if (!building) throw new NotFoundException('Building not found');
