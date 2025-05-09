@@ -1,11 +1,20 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import {
+  Controller,
+  Post,
+  UseInterceptors,
+  UploadedFile,
+  Body,
+  UseGuards,
+  ParseIntPipe,
+  Param,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UnitsService } from './units.service';
-import { CreateUnitDto } from './dto/create-unit.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/roles.guard';
-import { Roles } from 'src/auth/roles.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('units')
@@ -13,13 +22,12 @@ export class UnitsController {
   constructor(private readonly service: UnitsService) {}
 
   @Roles('admin')
-  @Post()
-  create(@Body() dto: CreateUnitDto) {
-    return this.service.create(dto);
-  }
-
-  @Get()
-  findAll() {
-    return this.service.findAll();
+  @Post('import/:buildingId')
+  @UseInterceptors(FileInterceptor('file'))
+  importFromExcel(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('buildingId', ParseIntPipe) buildingId: number,
+  ) {
+    return this.service.importFromExcel(file.buffer, buildingId);
   }
 }
