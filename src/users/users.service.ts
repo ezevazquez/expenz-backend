@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,19 +10,38 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+  ) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const { email, password, name } = createUserDto;
-    const exists = await this.userRepo.findOne({ where: { email } });
-    if (exists) throw new ConflictException('Email ya registrado');
+  async create(dto: CreateUserDto) {
+    const existing = await this.userRepo.findOneBy({ email: dto.email });
+    if (existing) {
+      throw new ConflictException('Email ya registrado');
+    }
 
-    const hashed = await bcrypt.hash(password, 10);
-    const user = this.userRepo.create({ email, password: hashed, name });
+    const hashed = await bcrypt.hash(dto.password, 10);
+
+    const user = this.userRepo.create({
+      email: dto.email,
+      password: hashed,
+      name: dto.name,
+      role: dto.role || 'user', // default: 'user'
+    });
+
     return this.userRepo.save(user);
   }
 
   async findByEmail(email: string) {
-    return this.userRepo.findOne({ where: { email } });
+    return this.userRepo.findOneBy({ email });
+  }
+
+  async findById(id: number) {
+    return this.userRepo.findOneBy({ id });
+  }
+
+  async findAll() {
+    return this.userRepo.find();
   }
 }
