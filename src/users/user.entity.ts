@@ -14,6 +14,6 @@ export class User {
   @Column()
   name: string;
 
-  @Column({ default: 'user' }) // o 'admin'
-  role: string;
+  @Column({ default: 'user' })
+  role: 'user' | 'admin' | 'superuser';
 }
