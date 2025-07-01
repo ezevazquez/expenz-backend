@@ -5,12 +5,64 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+  id                 String              @id @default(uuid())
+  email              String              @unique
+  name               String?
+  createdAt          DateTime            @default(now())
+  userConsorcioRoles UserConsorcioRole[]
+  userUnidades       UserUnidad[]
+}
+
+model Consorcio {
+  id                 String              @id @default(uuid())
+  nombre             String
+  userConsorcioRoles UserConsorcioRole[]
+  unidades           Unidad[]
+  expensas           Expensa[] // <--- AGREGAR ESTA LÍNEA
+}
+
+model Unidad {
+  id           String       @id @default(uuid())
+  consorcioId  String
+  consorcio    Consorcio    @relation(fields: [consorcioId], references: [id])
+  userUnidades UserUnidad[]
+}
+
+model UserConsorcioRole {
+  id          String    @id @default(uuid())
+  userId      String
+  consorcioId String
+  role        Role
+  user        User      @relation(fields: [userId], references: [id])
+  consorcio   Consorcio @relation(fields: [consorcioId], references: [id])
+}
+
+model UserUnidad {
+  id       String @id @default(uuid())
+  userId   String
+  unidadId String
+  user     User   @relation(fields: [userId], references: [id])
+  unidad   Unidad @relation(fields: [unidadId], references: [id])
+}
+
+enum Role {
+  superadmin
+  admin
+  user
+}
+
+model Expensa {
+  id               String   @id @default(uuid())
+  consorcioId      String
+  periodo          String // Ej: "2024-07" o "2024-07-01" (puede ser mes o fecha)
+  montoTotal       Float
+  fechaEmision     DateTime @default(now())
+  fechaVencimiento DateTime
+  detalles         Json? // Detalles de gastos, prorrateo, etc.
+
+  consorcio Consorcio @relation(fields: [consorcioId], references: [id])
 }
